@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="ku">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>ئیبراهیم · دەستکاری هەر بەرهەمێک · دینار</title>
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- html2pdf library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <style>
+        /* styles with edit capability */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+        }
+        body {
+            background: #f7f5f0;
+            padding: 16px 12px 30px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .main-wrapper {
+            max-width: 900px;
+            width: 100%;
+        }
+        /* header */
+        .store-header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .store-name {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(145deg, #3e2c1f, #b45f2b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 2px 2px 6px rgba(0,0,0,0.05);
+        }
+        .store-name i {
+            background: none;
+            -webkit-text-fill-color: #c97c4d;
+            margin-right: 6px;
+        }
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .pdf-btn, .cart-btn, .invoice-btn {
+            background: white;
+            border: 1px solid #d4b596;
+            border-radius: 40px;
+            padding: 10px 18px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #5a3e2b;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.02);
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .pdf-btn i { color: #c42e2e; }
+        .invoice-btn i { color: #1f7a5a; }
+        .cart-btn i { color: #2b6e4f; }
+        .pdf-btn:active, .cart-btn:active, .invoice-btn:active {
+            background: #f0e5da;
+            transform: scale(0.97);
+        }
+
+        /* camera panel */
+        .camera-panel {
+            background: #ffffff;
+            border-radius: 42px;
+            padding: 22px 18px;
+            box-shadow: 0 12px 22px -8px rgba(100, 60, 20, 0.1);
+            border: 1px solid #ffe6d0;
+            margin-bottom: 28px;
+        }
+        .camera-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            color: #623f25;
+            margin-bottom: 18px;
+            font-size: 1.25rem;
+        }
+        .camera-box {
+            background: #f5f5f5;
+            border-radius: 36px;
+            overflow: hidden;
+            aspect-ratio: 4/3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid white;
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05);
+            margin-bottom: 16px;
+        }
+        #videoElement {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background: #f0f0f0;
+            display: none;
+        }
+        .placeholder-cam {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #5e4d3c;
+            opacity: 0.6;
+            font-size: 1rem;
+            gap: 12px;
+        }
+        .capture-controls {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 8px 0 12px;
+        }
+        .btn {
+            background: white;
+            border: none;
+            border-radius: 60px;
+            padding: 14px 26px;
+            font-weight: 600;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 6px 12px rgba(120, 70, 30, 0.1);
+            border: 1px solid #edd7c0;
+            color: #3f2c1b;
+            transition: all 0.1s ease;
+            cursor: pointer;
+        }
+        .btn-primary {
+            background: #cc9c6b;
+            border: 1px solid #b47b4a;
+            color: white;
+        }
+        .btn-primary i {
+            color: white;
+        }
+        .btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .upload-input {
+            display: none;
+        }
+        .upload-label {
+            background: #a77b55;
+            border: 1px solid #7b5b3e;
+            color: white;
+        }
+
+        /* preview + fields */
+        .shot-preview-area {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .preview-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .image-preview {
+            width: 75px;
+            height: 75px;
+            border-radius: 22px;
+            background: #f0f0f0;
+            border: 2px dashed #b68d66;
+            object-fit: cover;
+        }
+        .input-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .input-field {
+            background: white;
+            border: 1px solid #e6cfb7;
+            border-radius: 40px;
+            padding: 14px 20px;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.15s;
+            width: 100%;
+        }
+        .input-field:focus {
+            border-color: #b4793b;
+            box-shadow: 0 0 0 3px rgba(236, 165, 84, 0.2);
+        }
+        .price-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .price-input {
+            flex: 1;
+            background: white;
+            border: 1px solid #e6cfb7;
+            border-radius: 40px;
+            padding: 14px 20px;
+            font-size: 1rem;
+            outline: none;
+        }
+        .currency {
+            font-weight: bold;
+            color: #6f4e37;
+            font-size: 1.2rem;
+            min-width: 70px;
+        }
+        .add-product-btn {
+            background: #6f4e37;
+            border: none;
+            border-radius: 60px;
+            padding: 15px 24px;
+            color: white;
+            font-weight: 700;
+            gap: 12px;
+            margin-top: 10px;
+            justify-content: center;
+            width: 100%;
+            box-shadow: 0 6px 0 #4d3624;
+            border-bottom: 2px solid #936e4b;
+        }
+        .add-product-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #4d3624;
+        }
+
+        /* bulk upload */
+        .bulk-upload-area {
+            background: #fef5ea;
+            border-radius: 32px;
+            padding: 18px 18px;
+            margin-bottom: 20px;
+            border: 2px dashed #b48d62;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+        .bulk-upload-area label {
+            font-weight: 600;
+            color: #5d3e28;
+            font-size: 1.2rem;
+            background: #ebdac8;
+            padding: 12px 28px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .bulk-upload-area label i { margin-right: 8px; }
+        .bulk-upload-area label:active { background: #dac2aa; }
+        .bulk-note {
+            color: #7e623c;
+            font-size: 1.05rem;
+        }
+
+        /* product grid with EDIT BUTTON */
+        .catalog-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 30px 0 16px;
+        }
+        .catalog-header h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #362418;
+        }
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 24px;
+        }
+        .product-card {
+            background: white;
+            border-radius: 36px;
+            padding: 22px 18px 20px;
+            box-shadow: 0 12px 24px rgba(110, 70, 30, 0.12);
+            border: 1px solid #fadfc4;
+            transition: 0.15s;
+            display: flex;
+            flex-direction: column;
+            cursor: default;
+            position: relative;
+        }
+        .product-card img {
+            width: 100%;
+            aspect-ratio: 1/1;
+            object-fit: cover;
+            border-radius: 28px;
+            background: #f0f0f0;
+            margin-bottom: 16px;
+            border: 3px solid #fff1e2;
+        }
+        .product-name {
+            font-weight: 700;
+            font-size: 1.6rem;
+            color: #2e1f14;
+            word-break: break-word;
+        }
+        .product-price {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #1d7a5c;
+            margin: 8px 0 4px;
+        }
+        .product-desc {
+            font-size: 1rem;
+            color: #7b624b;
+            margin: 8px 0 12px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+            gap: 6px;
+        }
+        .add-to-cart-btn {
+            background: #2b6e4f;
+            border: none;
+            border-radius: 40px;
+            padding: 12px 16px;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            flex: 2;
+        }
+        .edit-card-btn {
+            background: #b48a60;
+            border: none;
+            border-radius: 40px;
+            padding: 12px 14px;
+            color: white;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            flex: 1;
+            justify-content: center;
+        }
+        .delete-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #b37b5b;
+            cursor: pointer;
+            width: 40px;
+        }
+
+        /* edit modal (for editing product) */
+        .edit-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+            z-index: 2500;
+        }
+        .edit-modal-content {
+            background: #fffaf2;
+            border-radius: 60px;
+            max-width: 90%;
+            width: 500px;
+            padding: 40px 30px;
+            box-shadow: 0 30px 40px rgba(0,0,0,0.4);
+            border: 4px solid #e0c09e;
+        }
+        .edit-modal-content h3 {
+            font-size: 2rem;
+            margin-bottom: 25px;
+            color: #362015;
+            text-align: center;
+        }
+        .edit-field {
+            margin-bottom: 22px;
+        }
+        .edit-field label {
+            font-weight: 600;
+            color: #4f3a28;
+            font-size: 1.2rem;
+            display: block;
+            margin-bottom: 6px;
+            margin-left: 10px;
+        }
+        .edit-field input, .edit-field textarea {
+            width: 100%;
+            background: white;
+            border: 2px solid #e0c2a5;
+            border-radius: 50px;
+            padding: 16px 22px;
+            font-size: 1.1rem;
+            outline: none;
+        }
+        .edit-field textarea {
+            border-radius: 30px;
+            resize: vertical;
+            min-height: 80px;
+        }
+        .edit-field input:focus, .edit-field textarea:focus {
+            border-color: #b47739;
+        }
+        .edit-modal-actions {
+            display: flex;
+            gap: 16px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+        .save-edit-btn, .cancel-edit-btn {
+            border: none;
+            border-radius: 60px;
+            padding: 16px 32px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .save-edit-btn {
+            background: #2b6e4f;
+            color: white;
+            box-shadow: 0 5px 0 #1d4d38;
+        }
+        .cancel-edit-btn {
+            background: #b48a60;
+            color: white;
+            box-shadow: 0 5px 0 #7b5f42;
+        }
+        .save-edit-btn:active, .cancel-edit-btn:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        /* modal (view) */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .modal-content {
+            background: #fffbf5;
+            border-radius: 60px;
+            max-width: 90%;
+            width: 480px;
+            padding: 36px 28px;
+            box-shadow: 0 30px 40px rgba(0,0,0,0.3);
+            text-align: center;
+            border: 3px solid #e4c7a9;
+        }
+        .modal-img {
+            width: 260px;
+            height: 260px;
+            border-radius: 60px;
+            object-fit: cover;
+            margin: 0 auto 20px;
+            border: 4px solid #cfaa80;
+        }
+        .modal-name {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2f1f12;
+        }
+        .modal-price {
+            font-size: 2rem;
+            color: #1d7a5c;
+            font-weight: 800;
+            margin: 10px;
+        }
+        .modal-desc {
+            font-size: 1.3rem;
+            color: #4f3a28;
+            margin: 15px 0;
+        }
+        .modal-close {
+            background: #b48a60;
+            border: none;
+            border-radius: 60px;
+            padding: 18px 36px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-top: 15px;
+            cursor: pointer;
+        }
+
+        /* cart sidebar (unchanged) */
+        .cart-sidebar {
+            position: fixed;
+            top: 0; right: -100%;
+            width: 85%;
+            max-width: 420px;
+            height: 100%;
+            background: #fffcf5;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.2);
+            transition: 0.3s ease;
+            z-index: 1500;
+            padding: 28px 20px;
+            overflow-y: auto;
+            border-left: 3px solid #cfa876;
+        }
+        .cart-sidebar.open {
+            right: 0;
+        }
+        .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        .cart-item {
+            display: flex;
+            gap: 12px;
+            background: #f8ede1;
+            border-radius: 32px;
+            padding: 16px;
+            margin-bottom: 18px;
+            align-items: center;
+        }
+        .cart-item img {
+            width: 70px;
+            height: 70px;
+            border-radius: 24px;
+            object-fit: cover;
+        }
+        .cart-item-info {
+            flex: 2;
+        }
+        .cart-item-name {
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+        .cart-item-price {
+            color: #1d7a5c;
+            font-weight: 600;
+        }
+        .cart-item-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            border-radius: 40px;
+            padding: 5px 10px;
+            border: 1px solid #cfa876;
+        }
+        .cart-item-controls button {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            color: #4f3a28;
+            font-weight: bold;
+        }
+        .cart-item-controls button:active {
+            background: #e2cfba;
+        }
+        .cart-item-controls span {
+            min-width: 25px;
+            text-align: center;
+            font-weight: 600;
+        }
+        .cart-remove {
+            color: #b1552e;
+            font-size: 1.3rem;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+        .cart-footer {
+            margin-top: 25px;
+            text-align: center;
+        }
+        .cart-total {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #1f4d3a;
+            margin-bottom: 20px;
+        }
+        .checkout-btn {
+            background: #2b6e4f;
+            border: none;
+            border-radius: 40px;
+            padding: 18px;
+            width: 100%;
+            color: white;
+            font-weight: bold;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.2);
+            z-index: 1400;
+        }
+        .invoice-extra-fields {
+            background: #f0e7dd;
+            border-radius: 36px;
+            padding: 20px;
+            margin: 20px 0 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            border: 1px solid #cfb69b;
+        }
+        .field-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .field-row label {
+            font-weight: 600;
+            min-width: 90px;
+            color: #4d3624;
+            font-size: 1.2rem;
+        }
+        .field-row input {
+            flex: 1;
+            background: white;
+            border: 1px solid #c8a987;
+            border-radius: 50px;
+            padding: 14px 18px;
+            font-size: 1rem;
+            outline: none;
+        }
+        /* PDF styles (unchanged, short) */
+        .pdf-container { position: fixed; top:0; left:0; width:100%; background: white; z-index:-1000; opacity:0; pointer-events:none; padding:20px; }
+        .pdf-catalog-grid { display: grid; grid-template-columns: repeat(2,1fr); gap:20px; }
+        .pdf-item { border:1px solid #ddd; border-radius:16px; padding:18px; background:#fff; }
+        .pdf-item img { width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:12px; }
+        .pdf-item h3 { font-size:1.6rem; color:#000; }
+        .pdf-item .pdf-price { font-size:1.4rem; color:#000; }
+        .pdf-invoice { max-width:900px; margin:0 auto; background:#fff; padding:30px; }
+        .invoice-header { text-align:center; border-bottom:2px solid #333; }
+        .invoice-meta { display:flex; justify-content:space-between; background:#f8f8f8; padding:20px; border-radius:12px; }
+    </style>
+</head>
+<body>
+<div class="main-wrapper">
+    <!-- header -->
+    <div class="store-header">
+        <div class="store-name"><i class="fas fa-crown"></i> ئیبراهیم</div>
+        <div class="header-actions">
+            <button class="cart-btn" id="toggleCartBtn"><i class="fas fa-shopping-cart"></i> سەبەتە <span id="cartCount">0</span></button>
+            <button class="pdf-btn" id="downloadCatalogBtn"><i class="fas fa-file-pdf"></i> کاتالۆگ PDF</button>
+            <button class="invoice-btn" id="downloadInvoiceBtn"><i class="fas fa-receipt"></i> پسوولە PDF</button>
+        </div>
+    </div>
+
+    <!-- bulk upload -->
+    <div class="bulk-upload-area">
+        <label for="bulkImagesInput"><i class="fas fa-images"></i> بارکردنی کۆمەڵە وێنە</label>
+        <input type="file" id="bulkImagesInput" class="upload-input" accept="image/*" multiple>
+        <span class="bulk-note"><i class="fas fa-info-circle"></i> ١٠٠+ وێنە هەڵبژێرە. دواتر دەستکاری بکە بە کلیکی <i class="fas fa-edit"></i></span>
+    </div>
+
+    <!-- camera panel -->
+    <div class="camera-panel">
+        <div class="camera-title"><i class="fas fa-camera-retro"></i> زیادکردنی بەرهەم (دیناری عێراقی)</div>
+        <div class="camera-box">
+            <video id="videoElement" autoplay playsinline></video>
+            <div id="cameraPlaceholder" class="placeholder-cam"><i class="fas fa-camera" style="font-size: 3rem;"></i><span>پێشبینینی کامێرا</span></div>
+        </div>
+        <div class="capture-controls">
+            <button class="btn" id="startCameraBtn"><i class="fas fa-play"></i> کردنەوەی کامێرا</button>
+            <button class="btn btn-primary" id="captureBtn" disabled><i class="fas fa-camera"></i> گرتن</button>
+            <input type="file" id="uploadImageInput" class="upload-input" accept="image/*" />
+            <label for="uploadImageInput" class="btn upload-label"><i class="fas fa-cloud-upload-alt"></i> بارکردن</label>
+        </div>
+
+        <!-- single preview -->
+        <div class="shot-preview-area" id="shotPreviewArea" style="display: none;">
+            <div class="preview-row">
+                <img id="capturedPreviewImg" class="image-preview" src="" alt="پێشبینین">
+                <div class="input-group">
+                    <input type="text" id="productNameInput" class="input-field" placeholder="ناوی بەرهەم" maxlength="40">
+                    <input type="text" id="productDescInput" class="input-field" placeholder="پێناسە" maxlength="60">
+                    <div class="price-row">
+                        <span class="currency">دینار ع</span>
+                        <input type="number" id="productPriceInput" class="price-input" placeholder="٠" step="1" min="0">
+                    </div>
+                </div>
+            </div>
+            <button class="btn add-product-btn" id="addProductBtn"><i class="fas fa-plus-circle"></i> زیادکردن بۆ کاتالۆگ</button>
+        </div>
+    </div>
+
+    <!-- catalog -->
+    <div class="catalog-header">
+        <h2><i class="fas fa-boxes"></i> بەرهەمەکان</h2>
+        <span style="background:#e3cfba; padding:8px 20px; border-radius:50px;" id="productCount">٠</span>
+    </div>
+    <div id="productGridContainer" class="product-grid"></div>
+
+    <!-- hidden pdf containers -->
+    <div id="pdfCatalogContainer" class="pdf-container"></div>
+    <div id="pdfInvoiceContainer" class="pdf-container"></div>
+</div>
+
+<!-- view modal -->
+<div class="modal" id="productModal">
+    <div class="modal-content">
+        <img id="modalImg" class="modal-img" src="" alt="">
+        <div class="modal-name" id="modalName"></div>
+        <div class="modal-price" id="modalPrice"></div>
+        <div class="modal-desc" id="modalDesc"></div>
+        <button class="modal-close" id="closeModalBtn">داخستن</button>
+    </div>
+</div>
+
+<!-- EDIT MODAL for product -->
+<div class="edit-modal" id="editProductModal">
+    <div class="edit-modal-content">
+        <h3><i class="fas fa-edit"></i> دەستکاری بەرهەم</h3>
+        <div class="edit-field">
+            <label>ناوی بەرهەم</label>
+            <input type="text" id="editName" placeholder="ناو">
+        </div>
+        <div class="edit-field">
+            <label>پێناسە</label>
+            <textarea id="editDesc" placeholder="پێناسە ..." rows="2"></textarea>
+        </div>
+        <div class="edit-field">
+            <label>نرخ (دینار)</label>
+            <input type="number" id="editPrice" placeholder="٠" step="1" min="0">
+        </div>
+        <div class="edit-modal-actions">
+            <button class="save-edit-btn" id="saveEditBtn"><i class="fas fa-save"></i> پاشەکەوت</button>
+            <button class="cancel-edit-btn" id="cancelEditBtn"><i class="fas fa-times"></i> ڕەتکردنەوە</button>
+        </div>
+    </div>
+</div>
+
+<!-- cart sidebar -->
+<div class="overlay" id="overlay"></div>
+<div class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header"><span>🛒 سەبەتە</span><i class="fas fa-times" id="closeCartBtn" style="font-size:2rem; cursor:pointer;"></i></div>
+    <div id="cartItemsList"></div>
+    <div class="invoice-extra-fields">
+        <div class="field-row"><label>بڕ (remainder):</label><input type="text" id="remainderInput" placeholder="٢٥٠٠ دینار"></div>
+        <div class="field-row"><label>ماوە (duration):</label><input type="text" id="durationInput" placeholder="٣ ڕۆژ"></div>
+    </div>
+    <div class="cart-footer">
+        <div class="cart-total" id="cartTotal">کۆی گشتی: ٠ دینار</div>
+        <button class="checkout-btn" id="createInvoiceBtn"><i class="fas fa-file-invoice"></i> دروستکردنی پسوولە</button>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // --- data stores ---
+        let products = [];               // each: { id, name, desc, price (number), imageData }
+        let cart = [];                   // array { id, quantity }
+
+        // DOM elements
+        const video = document.getElementById('videoElement');
+        const cameraPlaceholder = document.getElementById('cameraPlaceholder');
+        const startCameraBtn = document.getElementById('startCameraBtn');
+        const captureBtn = document.getElementById('captureBtn');
+        const uploadInput = document.getElementById('uploadImageInput');
+        const shotPreviewArea = document.getElementById('shotPreviewArea');
+        const capturedPreviewImg = document.getElementById('capturedPreviewImg');
+        const productNameInput = document.getElementById('productNameInput');
+        const productDescInput = document.getElementById('productDescInput');
+        const productPriceInput = document.getElementById('productPriceInput');
+        const addProductBtn = document.getElementById('addProductBtn');
+        const gridContainer = document.getElementById('productGridContainer');
+        const productCountSpan = document.getElementById('productCount');
+        const downloadCatalogBtn = document.getElementById('downloadCatalogBtn');
+        const downloadInvoiceBtn = document.getElementById('downloadInvoiceBtn');
+        const pdfCatalogContainer = document.getElementById('pdfCatalogContainer');
+        const pdfInvoiceContainer = document.getElementById('pdfInvoiceContainer');
+        const bulkImagesInput = document.getElementById('bulkImagesInput');
+
+        // modals
+        const viewModal = document.getElementById('productModal');
+        const modalImg = document.getElementById('modalImg');
+        const modalName = document.getElementById('modalName');
+        const modalPrice = document.getElementById('modalPrice');
+        const modalDesc = document.getElementById('modalDesc');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+
+        // edit modal
+        const editModal = document.getElementById('editProductModal');
+        const editName = document.getElementById('editName');
+        const editDesc = document.getElementById('editDesc');
+        const editPrice = document.getElementById('editPrice');
+        const saveEditBtn = document.getElementById('saveEditBtn');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        let currentEditId = null;  // product id being edited
+
+        // cart elements
+        const cartSidebar = document.getElementById('cartSidebar');
+        const toggleCartBtn = document.getElementById('toggleCartBtn');
+        const closeCartBtn = document.getElementById('closeCartBtn');
+        const overlay = document.getElementById('overlay');
+        const cartItemsList = document.getElementById('cartItemsList');
+        const cartCountSpan = document.getElementById('cartCount');
+        const cartTotalSpan = document.getElementById('cartTotal');
+        const createInvoiceBtn = document.getElementById('createInvoiceBtn');
+        const remainderInput = document.getElementById('remainderInput');
+        const durationInput = document.getElementById('durationInput');
+
+        let stream = null;
+        let currentImageData = null;
+
+        // --- storage ---
+        function loadFromStorage() {
+            try {
+                const savedProducts = localStorage.getItem('ibrahim_products');
+                if (savedProducts) products = JSON.parse(savedProducts);
+                const savedCart = localStorage.getItem('ibrahim_cart');
+                if (savedCart) cart = JSON.parse(savedCart);
+            } catch (e) { products = []; cart = []; }
+        }
+        function saveProducts() { localStorage.setItem('ibrahim_products', JSON.stringify(products)); }
+        function saveCart() { localStorage.setItem('ibrahim_cart', JSON.stringify(cart)); }
+
+        // --- helpers ---
+        function formatIQD(price) {
+            return new Intl.NumberFormat('ar-IQ', { style: 'decimal', maximumFractionDigits: 0 }).format(price) + ' دینار';
+        }
+        function parsePrice(v) { return Math.floor(parseFloat(v) || 0); }
+        function escapeHtml(unsafe) {
+            if (!unsafe) return unsafe;
+            return unsafe.replace(/[&<>"]/g, m => {
+                if (m === '&') return '&amp;'; if (m === '<') return '&lt;'; if (m === '>') return '&gt;'; if (m === '"') return '&quot;';
+                return m;
+            });
+        }
+
+        // --- render products (with edit button) ---
+        function renderProducts() {
+            if (products.length === 0) {
+                gridContainer.innerHTML = `<div class="empty-catalog"><i class="fas fa-box-open"></i><br>هیچ بەرهەمێک نییە · زیاد بکە!</div>`;
+            } else {
+                let html = '';
+                products.forEach(p => {
+                    html += `
+                        <div class="product-card" data-product-id="${p.id}">
+                            <img src="${p.imageData}" alt="" loading="lazy">
+                            <div class="product-name">${escapeHtml(p.name)}</div>
+                            <div class="product-price">${formatIQD(p.price)}</div>
+                            <div class="product-desc">${escapeHtml(p.desc)}</div>
+                            <div class="card-footer">
+                                <button class="add-to-cart-btn" onclick="event.stopPropagation(); window.addToCart('${p.id}')"><i class="fas fa-cart-plus"></i> زیادکردن</button>
+                                <button class="edit-card-btn" onclick="event.stopPropagation(); window.openEditModal('${p.id}')"><i class="fas fa-edit"></i> دەستکاری</button>
+                                <button class="delete-btn" onclick="event.stopPropagation(); window.deleteProduct('${p.id}')"><i class="fas fa-trash-alt"></i></button>
+                            </div>
+                        </div>
+                    `;
+                });
+                gridContainer.innerHTML = html;
+
+                // view modal on image or name click (optional)
+                document.querySelectorAll('.product-card').forEach(card => {
+                    card.addEventListener('click', (e) => {
+                        if (e.target.closest('.add-to-cart-btn') || e.target.closest('.edit-card-btn') || e.target.closest('.delete-btn')) return;
+                        const pid = card.dataset.productId;
+                        const prod = products.find(p => p.id === pid);
+                        if (prod) {
+                            modalImg.src = prod.imageData;
+                            modalName.innerText = prod.name;
+                            modalPrice.innerText = formatIQD(prod.price);
+                            modalDesc.innerText = prod.desc;
+                            viewModal.style.display = 'flex';
+                        }
+                    });
+                });
+            }
+            productCountSpan.innerText = products.length;
+            updatePDFCatalog();
+            saveProducts();
+        }
+
+        // --- edit functions ---
+        window.openEditModal = function(productId) {
+            const prod = products.find(p => p.id === productId);
+            if (!prod) return;
+            currentEditId = productId;
+            editName.value = prod.name;
+            editDesc.value = prod.desc;
+            editPrice.value = prod.price;
+            editModal.style.display = 'flex';
+        };
+
+        function closeEditModal() {
+            editModal.style.display = 'none';
+            currentEditId = null;
+        }
+
+        saveEditBtn.addEventListener('click', () => {
+            if (!currentEditId) return;
+            const prod = products.find(p => p.id === currentEditId);
+            if (prod) {
+                prod.name = editName.value.trim() || 'بەرهەم';
+                prod.desc = editDesc.value.trim() || '—';
+                prod.price = parsePrice(editPrice.value);
+                renderProducts();
+                updateCartUI();  // in case price changed, cart total updates
+                closeEditModal();
+            }
+        });
+
+        cancelEditBtn.addEventListener('click', closeEditModal);
+        window.addEventListener('click', (e) => { if (e.target === editModal) closeEditModal(); });
+
+        // --- cart functions (unchanged) ---
+        window.addToCart = function(productId) {
+            const existing = cart.find(item => item.id === productId);
+            if (existing) {
+                if (existing.quantity < 10) existing.quantity += 1;
+                else alert('زۆرترین ١٠ دانە');
+            } else {
+                cart.push({ id: productId, quantity: 1 });
+            }
+            updateCartUI(); saveCart();
+        };
+        window.increaseQty = function(productId) {
+            const item = cart.find(i => i.id === productId);
+            if (item && item.quantity < 10) { item.quantity += 1; updateCartUI(); saveCart(); }
+            else if (item && item.quantity === 10) alert('زۆرترین ١٠ دانە');
+        };
+        window.decreaseQty = function(productId) {
+            const item = cart.find(i => i.id === productId);
+            if (item) {
+                if (item.quantity > 1) item.quantity -= 1;
+                else cart = cart.filter(i => i.id !== productId);
+                updateCartUI(); saveCart();
+            }
+        };
+        window.removeFromCart = function(productId) {
+            cart = cart.filter(item => item.id !== productId);
+            updateCartUI(); saveCart();
+        };
+        function calculateTotal() {
+            return cart.reduce((acc, item) => {
+                const prod = products.find(p => p.id === item.id);
+                return acc + (prod ? prod.price * item.quantity : 0);
+            }, 0);
+        }
+        function updateCartUI() {
+            const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
+            cartCountSpan.innerText = totalItems;
+            if (cart.length === 0) {
+                cartItemsList.innerHTML = '<div style="padding:20px; text-align:center;">سەبەتە بەتاڵە</div>';
+                cartTotalSpan.innerText = 'کۆی گشتی: ٠ دینار';
+            } else {
+                let itemsHtml = '';
+                cart.forEach(item => {
+                    const p = products.find(pr => pr.id === item.id);
+                    if (p) {
+                        itemsHtml += `
+                            <div class="cart-item">
+                                <img src="${p.imageData}" alt="">
+                                <div class="cart-item-info">
+                                    <div class="cart-item-name">${escapeHtml(p.name)}</div>
+                                    <div class="cart-item-price">${formatIQD(p.price)} هەر دانەیەک</div>
+                                </div>
+                                <div class="cart-item-controls">
+                                    <button onclick="decreaseQty('${p.id}')">−</button>
+                                    <span>${item.quantity}</span>
+                                    <button onclick="increaseQty('${p.id}')">+</button>
+                                </div>
+                                <i class="fas fa-trash cart-remove" onclick="removeFromCart('${p.id}')"></i>
+                            </div>
+                        `;
+                    }
+                });
+                cartItemsList.innerHTML = itemsHtml;
+                cartTotalSpan.innerText = `کۆی گشتی: ${formatIQD(calculateTotal())}`;
+            }
+        }
+        window.deleteProduct = function(id) {
+            products = products.filter(p => p.id !== id);
+            cart = cart.filter(item => item.id !== id);
+            renderProducts();
+            updateCartUI();
+            saveCart();
+        };
+
+        // --- PDF (short) ---
+        function updatePDFCatalog() {
+            if (products.length === 0) { pdfCatalogContainer.innerHTML = ''; return; }
+            let itemsHtml = '<div class="pdf-catalog-grid">';
+            products.forEach(p => {
+                itemsHtml += `<div class="pdf-item"><img src="${p.imageData}" alt=""><h3>${escapeHtml(p.name)}</h3><div class="pdf-price">${formatIQD(p.price)}</div><p>${escapeHtml(p.desc)}</p></div>`;
+            });
+            itemsHtml += '</div>';
+            pdfCatalogContainer.innerHTML = itemsHtml;
+        }
+        function buildInvoicePDF() {
+            if (cart.length === 0) { alert('سەبەتە بەتاڵە'); return false; }
+            const remainderText = remainderInput.value.trim() || '—';
+            const durationText = durationInput.value.trim() || '—';
+            const today = new Date().toLocaleDateString('ku-IQ', { year:'numeric', month:'long', day:'numeric' });
+            let itemsHtml = '<div class="pdf-invoice"><div class="invoice-header"><h1>ئیبراهیم - پسوولە</h1><p>بەروار: '+escapeHtml(today)+'</p></div>';
+            itemsHtml += `<div class="invoice-meta"><div><span>بڕ:</span> ${escapeHtml(remainderText)}</div><div><span>ماوە:</span> ${escapeHtml(durationText)}</div></div><div class="invoice-items">`;
+            cart.forEach(item => {
+                const p = products.find(pr => pr.id === item.id);
+                if(p) itemsHtml += `<div class="invoice-item"><img src="${p.imageData}" alt=""><div class="invoice-details"><h3>${escapeHtml(p.name)} × ${item.quantity}</h3><p>${escapeHtml(p.desc)}</p></div><div class="invoice-price">${formatIQD(p.price * item.quantity)}</div></div>`;
+            });
+            itemsHtml += '</div><div class="invoice-total">کۆی گشتی: '+formatIQD(calculateTotal())+'</div><div class="invoice-footer">سوپاس</div></div>';
+            pdfInvoiceContainer.innerHTML = itemsHtml;
+            return true;
+        }
+        function downloadPDF(container, filename) {
+            container.style.position = 'relative'; container.style.opacity = '1'; container.style.zIndex = '1'; container.style.pointerEvents = 'none';
+            html2pdf().from(container).set({ margin:[0.3,0.3,0.3,0.3], filename:filename, image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2,useCORS:true}, jsPDF:{unit:'in',format:'a4',orientation:'portrait'} }).save().then(() => {
+                container.style.position = 'fixed'; container.style.opacity = '0'; container.style.zIndex = '-1000';
+            });
+        }
+
+        // --- camera & single add ---
+        function stopTracks() { if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; } video.style.display = 'none'; cameraPlaceholder.style.display = 'flex'; captureBtn.disabled = true; }
+        startCameraBtn.addEventListener('click', async () => {
+            try { if (stream) stopTracks(); stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }); video.srcObject = stream; video.style.display = 'block'; cameraPlaceholder.style.display = 'none'; captureBtn.disabled = false; } catch { alert('کامێرا بەردەست نییە'); }
+        });
+        captureBtn.addEventListener('click', () => {
+            if (!stream) return alert('کامێرا بکەرەوە');
+            const canvas = document.createElement('canvas'); canvas.width = video.videoWidth || 640; canvas.height = video.videoHeight || 480;
+            if (!canvas.width) return alert('کامێرا ئامادە نییە');
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            currentImageData = canvas.toDataURL('image/jpeg', 0.9);
+            capturedPreviewImg.src = currentImageData; shotPreviewArea.style.display = 'block';
+        });
+        uploadInput.addEventListener('change', (e) => {
+            const file = e.target.files[0]; if (!file) return;
+            const reader = new FileReader(); reader.onload = (ev) => { currentImageData = ev.target.result; capturedPreviewImg.src = currentImageData; shotPreviewArea.style.display = 'block'; if (stream) stopTracks(); }; reader.readAsDataURL(file); uploadInput.value = '';
+        });
+        addProductBtn.addEventListener('click', () => {
+            if (!currentImageData) return alert('وێنە بگرە یان باربکە');
+            const name = productNameInput.value.trim() || 'بەرهەم';
+            const desc = productDescInput.value.trim() || 'خۆش';
+            const price = parsePrice(productPriceInput.value);
+            products.push({ id: Date.now()+'-'+Math.random().toString(36).substr(2,8), name, desc, price, imageData: currentImageData });
+            renderProducts();
+            productNameInput.value = ''; productDescInput.value = ''; productPriceInput.value = ''; shotPreviewArea.style.display = 'none'; currentImageData = null; capturedPreviewImg.src = ''; if (stream) stopTracks();
+        });
+
+        // bulk upload
+        bulkImagesInput.addEventListener('change', function(e) {
+            const files = Array.from(e.target.files); if (!files.length) return;
+            let processed = 0;
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    products.push({ id: Date.now()+'-'+Math.random().toString(36).substr(2,8)+'-'+processed, name: 'وێنە '+(processed+1), desc: 'دەستکاری بکە', price: 0, imageData: ev.target.result });
+                    processed++;
+                    if (processed === files.length) { renderProducts(); if (stream) stopTracks(); shotPreviewArea.style.display = 'none'; currentImageData = null; alert(files.length + ' بەرهەم زیادکران. دەستکاریان بکە بە کلیکی دەستکاری'); }
+                };
+                reader.readAsDataURL(file);
+            });
+            bulkImagesInput.value = '';
+        });
+
+        // download listeners
+        downloadCatalogBtn.addEventListener('click', () => { updatePDFCatalog(); downloadPDF(pdfCatalogContainer, 'catalog.pdf'); });
+        downloadInvoiceBtn.addEventListener('click', () => { if (buildInvoicePDF()) downloadPDF(pdfInvoiceContainer, 'invoice.pdf'); });
+        createInvoiceBtn.addEventListener('click', () => { cartSidebar.classList.remove('open'); overlay.style.display = 'none'; if (buildInvoicePDF()) downloadPDF(pdfInvoiceContainer, 'invoice.pdf'); });
+
+        // cart sidebar
+        toggleCartBtn.addEventListener('click', () => { cartSidebar.classList.add('open'); overlay.style.display = 'block'; updateCartUI(); });
+        closeCartBtn.addEventListener('click', () => { cartSidebar.classList.remove('open'); overlay.style.display = 'none'; });
+        overlay.addEventListener('click', () => { cartSidebar.classList.remove('open'); overlay.style.display = 'none'; });
+        closeModalBtn.addEventListener('click', () => viewModal.style.display = 'none');
+        window.addEventListener('click', (e) => { if (e.target === viewModal) viewModal.style.display = 'none'; });
+
+        // expose functions
+        window.increaseQty = increaseQty; window.decreaseQty = decreaseQty; window.removeFromCart = removeFromCart; window.addToCart = addToCart; window.deleteProduct = deleteProduct; window.openEditModal = openEditModal;
+
+        // initial
+        loadFromStorage();
+        const validIds = new Set(products.map(p => p.id));
+        cart = cart.filter(item => validIds.has(item.id));
+        renderProducts(); updateCartUI(); updatePDFCatalog();
+    })();
+</script>
+</body>
+</html>
